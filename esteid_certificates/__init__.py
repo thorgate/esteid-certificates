@@ -1,6 +1,6 @@
 import os
 
-__version__ = "1.0"
+__version__ = "1.0.1"
 
 _dirname = os.path.dirname(__file__)
 CERT_PATH = os.path.abspath(os.path.join(_dirname, 'files'))
@@ -25,6 +25,7 @@ ISSUER_CERTS = {
     'EID-SK 2016': 'EID-SK_2016.pem',
     'KLASS3-SK 2010': 'KLASS3-SK_2010_EECCRCA.pem',
     'KLASS3-SK 2016': 'KLASS3-SK_2016_EECCRCA_SHA384.pem',
+    'sk-ocsp-responder-certificates': 'sk-ocsp-responder-certificates.pem',
 }
 
 ROOT_CA_FILE_NAME = "EE_Certification_Centre_Root_CA.pem"
