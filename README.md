@@ -1,5 +1,8 @@
 # esteid-certificates
 
+[![Build Status](https://travis-ci.org/thorgate/esteid-certificates.svg?branch=main)](https://travis-ci.org/thorgate/esteid-certificates)
+[![Coverage Status](https://coveralls.io/repos/github/thorgate/esteid-certificates/badge.svg?branch=main)](https://coveralls.io/github/thorgate/esteid-certificates?branch=main)
+
 This library contains certificates for Estonian electronic identity services and a couple of functions
 that facilitate usage.
 
