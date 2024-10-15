@@ -4,7 +4,8 @@
 
 * Add autoupdater script 
 * Update to use the newest certificates
-* Remove sk-ocsp-responder-certificates from the package, as it expired (and all OCSP certificates are listed as expired)
+* Add all valid certificates from TSA certificates tab on SK's website
+* Remove sk-ocsp-responder-certificates from the package, as they expired (and all OCSP certificates are listed as expired)
 
 ## Version 1.0.1, 2020-10-27
 

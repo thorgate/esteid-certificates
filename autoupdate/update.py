@@ -5,6 +5,7 @@ import enum
 import logging
 import os
 import pathlib
+import re
 import subprocess
 import urllib.parse
 from functools import cached_property
@@ -164,7 +165,7 @@ class CertificateUpdater:
                 continue
 
             logging.debug("Found certificate %s", certificate_title)
-            valid = certificate.find("p", string="Valid")
+            valid = certificate.find("p", string=re.compile("^(Valid|Valid\s/.*)$"))
             if not valid:
                 logging.debug(
                     "Certificate %s is not valid, skipping", certificate_title
@@ -195,6 +196,11 @@ class CertificateUpdater:
 
         for certificate in self.load_certificates_from_tab(
             "nav-Intermediate-CAs", CertificateType.INTERMEDIATE
+        ):
+            self._certificates.append(certificate)
+
+        for certificate in self.load_certificates_from_tab(
+            "nav-TSA-certificates", CertificateType.INTERMEDIATE
         ):
             self._certificates.append(certificate)
 
