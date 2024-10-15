@@ -1,6 +1,5 @@
 # esteid-certificates
 
-[![Build Status](https://travis-ci.org/thorgate/esteid-certificates.svg?branch=main)](https://travis-ci.org/thorgate/esteid-certificates)
 [![Coverage Status](https://coveralls.io/repos/github/thorgate/esteid-certificates/badge.svg?branch=main)](https://coveralls.io/github/thorgate/esteid-certificates?branch=main)
 
 This library contains certificates for Estonian electronic identity services and a couple of functions
@@ -57,3 +56,7 @@ The included certificates are copyright to their issuing parties:
 * [SK ID Solutions AS](https://www.skidsolutions.eu/repositoorium/)
 
 and are redistributed for the sole purpose of convenience of use.
+
+## Updating
+
+See the [update script](autoupdate/README.md) for how to update the certificates.
