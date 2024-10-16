@@ -73,68 +73,32 @@ class CertificateUpdater:
         self.load_test_certificates()
         self.check()
 
+    def get_certificate_by_type(self, certificate_type: CertificateType):
+        return sorted([
+            cert
+            for cert in self._certificates
+            if cert.certificate_type == certificate_type
+        ], key=lambda c: c.filename)
+
     def check(self):
-        if (
-            not (
-                n_root_certs := len(
-                    [
-                        cert
-                        for cert in self._certificates
-                        if cert.certificate_type == CertificateType.ROOT
-                    ]
-                )
-            )
-            == 1
-        ):
+        if (n_root_certs := len(self.get_certificate_by_type(CertificateType.ROOT))) != 1:
             logging.error(
                 "Expected to find exactly one root certificate, found %s", n_root_certs
             )
 
-        if (
-            not (
-                n_test_root_certs := len(
-                    [
-                        cert
-                        for cert in self._certificates
-                        if cert.certificate_type == CertificateType.TEST_ROOT
-                    ]
-                )
-            )
-            == 1
-        ):
+        if (n_test_root_certs := len(self.get_certificate_by_type(CertificateType.TEST_ROOT))) != 1:
             logging.error(
                 "Expected to find exactly one root certificate, found %s",
                 n_test_root_certs,
             )
 
-        if (
-            not (
-                len(
-                    [
-                        cert
-                        for cert in self._certificates
-                        if cert.certificate_type == CertificateType.INTERMEDIATE
-                    ]
-                )
-            )
-            > 1
-        ):
+        if len(self.get_certificate_by_type(CertificateType.INTERMEDIATE)) <= 1:
             logging.error(
                 "Expected to find at least one intermediate certificate",
             )
 
-        if (
-            not (
-                len(
-                    [
-                        cert
-                        for cert in self._certificates
-                        if cert.certificate_type == CertificateType.TEST
-                    ]
-                )
-            )
-            > 1
-        ):
+        if len(self.get_certificate_by_type(CertificateType.TEST)) <= 1:
+
             logging.error(
                 "Expected to find at least one test certificate",
             )
@@ -259,22 +223,15 @@ class CertificateUpdater:
         for certificate in sorted(removed_certificates):
             logging.info(" * %s", certificate)
 
-        root_certificate = next(
-            cert
-            for cert in self.certificates
-            if cert.certificate_type == CertificateType.ROOT
-        )
+        root_certificate = self.get_certificate_by_type(CertificateType.ROOT)[0]
+
         logging.info(
             "Root certificate will be %s: %s",
             "created" if root_certificate.filename in added_certificates else "updated",
             root_certificate.filename,
         )
 
-        test_root_certificate = next(
-            cert
-            for cert in self.certificates
-            if cert.certificate_type == CertificateType.TEST_ROOT
-        )
+        test_root_certificate = self.get_certificate_by_type(CertificateType.TEST_ROOT)[0]
         logging.info(
             "Test root certificate will be %s: %s",
             "created"
@@ -283,14 +240,7 @@ class CertificateUpdater:
             test_root_certificate.filename,
         )
 
-        intermediate_certificates = sorted(
-            [
-                cert
-                for cert in self.certificates
-                if cert.certificate_type == CertificateType.INTERMEDIATE
-            ],
-            key=lambda c: c.filename,
-        )
+        intermediate_certificates = self.get_certificate_by_type(CertificateType.INTERMEDIATE)
         logging.info(
             "%d intermediate certificates to be updated:",
             len(intermediate_certificates),
@@ -302,14 +252,7 @@ class CertificateUpdater:
                 certificate,
             )
 
-        test_certificates = sorted(
-            [
-                cert
-                for cert in self.certificates
-                if cert.certificate_type == CertificateType.TEST
-            ],
-            key=lambda c: c.filename,
-        )
+        test_certificates = self.get_certificate_by_type(CertificateType.TEST)
         logging.info("%d test certificates to be updated:", len(test_certificates))
         for certificate in test_certificates:
             logging.info(
@@ -341,32 +284,21 @@ class CertificateUpdater:
         test_certs = repr(
             {
                 cert.title: cert.filename
-                for cert in self.certificates
-                if cert.certificate_type != CertificateType.TEST
+                for cert in self.get_certificate_by_type(CertificateType.TEST)
             }
         )
         live_certs = repr(
             {
                 cert.title: cert.filename
-                for cert in self.certificates
-                if cert.certificate_type != CertificateType.INTERMEDIATE
+                for cert in self.get_certificate_by_type(CertificateType.INTERMEDIATE)
             }
         )
         issuer_certs = "{**TEST_CERTS, **LIVE_CERTS}"
         root_certificate = repr(
-            next(
-                cert
-                for cert in self.certificates
-                if cert.certificate_type == CertificateType.ROOT
-            ).filename
+            self.get_certificate_by_type(CertificateType.ROOT)[0].filename
         )
-
         test_root_certificate = repr(
-            next(
-                cert
-                for cert in self.certificates
-                if cert.certificate_type == CertificateType.TEST_ROOT
-            ).filename
+            self.get_certificate_by_type(CertificateType.TEST_ROOT)[0].filename
         )
         with (pathlib.Path(constants_path)).open("w") as f:
             f.write(

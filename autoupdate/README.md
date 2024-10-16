@@ -10,7 +10,7 @@ just update
 ```
 
 ## Steps to take manually after autoupdate
-* Check that the certificates are correct. Never you should commit and publish a package without checking that
+* Check that the certificates are correct. Never should you commit and publish a package without checking that
   the data is actually valid
 * Increment version in `esteid_certificates/__init__.py`
 * Add a new entry to `CHANGELOG.md`
