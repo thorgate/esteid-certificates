@@ -16,7 +16,7 @@ setup(
     long_description=readme,
     long_description_content_type='text/markdown',
     author='Thorgate',
-    author_email='jyrno@thorgate.eu',
+    author_email='info@thorgate.eu',
     url='https://github.com/thorgate/esteid-certificates',
     packages=[
         'esteid_certificates',
@@ -35,5 +35,8 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
     ],
 )

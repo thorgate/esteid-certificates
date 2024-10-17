@@ -1,0 +1,11 @@
+@_default:
+    just --list
+
+
+poetry:
+  poetry install --no-root
+
+update: poetry
+  poetry run python update.py ../esteid_certificates/files --constants ../esteid_certificates/constants.py
+  cd ..
+  git add .

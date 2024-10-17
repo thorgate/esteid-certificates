@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "esteid-certificates-autoupdate"
+version = "0.1.0"
+description = "Attempts to automatically download latest certificates from SK and update the package"
+authors = ["Sergey Kovalskiy <sergey@thorgate.eu>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+requests = "^2.32.3"
+beautifulsoup4 = "^4.12.3"
+ruff = "^0.6.9"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
