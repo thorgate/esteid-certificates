@@ -9,6 +9,9 @@ cd autoupdate
 just update
 ```
 
+You may want to inspect changes to constants.py and if any of the certificates
+are gone you can delete them from `esteid_certificates/files` directory.
+
 ## Steps to take manually after autoupdate
 * Check that the certificates are correct. Never should you commit and publish a package without checking that
   the data is actually valid
