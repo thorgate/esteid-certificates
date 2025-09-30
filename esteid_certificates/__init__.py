@@ -2,7 +2,7 @@ import os
 from .constants import ISSUER_CERTS, ROOT_CA_FILE_NAME, TEST_ROOT_CA_FILE_NAME
 
 
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 
 _dirname = os.path.dirname(__file__)
 CERT_PATH = os.path.abspath(os.path.join(_dirname, 'files'))

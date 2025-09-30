@@ -1,5 +1,9 @@
 # Changelog for esteid-certificates
 
+## Version 1.0.3, 2025-09-30
+
+* Update to use the newest certificates
+
 ## Version 1.0.2, 2024-10-15
 
 * Add autoupdater script 
