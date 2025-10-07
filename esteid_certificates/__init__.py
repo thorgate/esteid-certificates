@@ -1,3 +1,4 @@
+import typing as t
 import pathlib
 import warnings
 from .constants import ISSUER_CERTS, ROOT_CA_FILES, TEST_ROOT_CA_FILES
@@ -28,11 +29,11 @@ def get_certificate(issuer_name) -> bytes:
         return f.read()
 
 
-def get_root_ca_files(*, test=False) -> list[pathlib.Path]:
+def get_root_ca_files(*, test=False) -> t.List[pathlib.Path]:
     return constants.TEST_ROOT_CA_FILES if test else constants.ROOT_CA_FILES
 
 
-def get_root_certificates(*, test=False) -> list[bytes]:
+def get_root_certificates(*, test=False) -> t.List[bytes]:
     result = []
     for file_path in get_root_ca_files(test=test):
         with file_path.open("rb") as f:
