@@ -6,6 +6,5 @@ poetry:
   poetry install --no-root
 
 update: poetry
-  poetry run python update.py ../esteid_certificates/files --constants ../esteid_certificates/constants.py
-  cd ..
-  git add .
+  poetry run python update.py ../esteid_certificates/files/sk --constants ../esteid_certificates/constants/constants_sk.py
+  @echo "Zetes certificates need manual update as a page for publishing the certificates is not yet established"

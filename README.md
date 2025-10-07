@@ -15,36 +15,29 @@ The library covers the following use cases:
 
 Get a certificate by issuer's common name:
 ```python
-from esteid_certificates import get_certificate_file_name, get_certificate
+from esteid_certificates import get_certificate_file_path
 # path to PEM certificate file
-assert get_certificate_file_name("EID-SK 2016").endswith(".pem")
+path = get_certificate_file_name("ESTEID2018")
 # the certificate as bytes
-assert get_certificate("EID-SK 2016").startswith(b"-----BEGIN CERTIFICATE-----")
+with path.open("rb") as f:
+    assert f.read().startswith(b"-----BEGIN CERTIFICATE-----")
 ```
 
-Get the root certificate:
+Get the root certificates (also works for test certificates):
 ```python
-from esteid_certificates import get_root_ca_file_name, get_root_certificate
-# path to PEM certificate file
-assert get_root_ca_file_name().endswith(".pem")
-# the certificate as bytes
-assert get_root_certificate().startswith(b"-----BEGIN CERTIFICATE-----")
-```
-
-Get the TEST root certificate:
-```python
-from esteid_certificates import get_root_ca_file_name, get_root_certificate
-# path to PEM certificate file
-assert get_root_ca_file_name(test=True).endswith(".pem")
-# the certificate as bytes
-assert get_root_certificate(test=True).startswith(b"-----BEGIN CERTIFICATE-----")
+from esteid_certificates import get_root_ca_files
+for path in get_root_ca_files(test=False):
+    with path.open("rb") as f:
+        assert f.read().startswith(b"-----BEGIN CERTIFICATE-----")
 ```
 
 The certificates can be loaded using e.g. the `oscrypto` library:
 ```python
 from oscrypto.asymmetric import load_certificate
-cert = load_certificate(get_certificate("EID-SK 2016"))
-assert cert.asn1.native['tbs_certificate']['subject']['common_name'] == 'EID-SK 2016'
+from esteid_certificates import get_certificate
+
+cert = load_certificate(get_certificate("ESTEID2018"))
+assert cert.asn1.native['tbs_certificate']['subject']['common_name'] == 'ESTEID2018'
 ```
 
 ## Certificates

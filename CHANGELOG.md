@@ -1,5 +1,13 @@
 # Changelog for esteid-certificates
 
+## Version 1.0.4.dev1, 2025-10-07
+
+* Add latest SK certificates
+* Add Zetes certificates
+* Deprecate `get_root_ca_file_name` and `get_root_certificate`, which do not support multiple trust service providers, 
+  in favor of `get_root_ca_files` and `get_root_certificates`
+* Add `get_certificate_file_path` with pathlib support
+
 ## Version 1.0.3, 2025-03-18
 
 * Add 2025 timestamping certificates
