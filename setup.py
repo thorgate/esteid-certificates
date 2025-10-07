@@ -20,6 +20,7 @@ setup(
     url='https://github.com/thorgate/esteid-certificates',
     packages=[
         'esteid_certificates',
+        'esteid_certificates.constants',
     ],
     include_package_data=True,
     install_requires=[],
