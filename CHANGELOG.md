@@ -1,5 +1,10 @@
 # Changelog for esteid-certificates
 
+## Version 1.0.4.dev2, 2025-11-04
+
+* Implement Zetes certificate automatic upgrade
+* Add Zetes live certificates
+
 ## Version 1.0.4.dev1, 2025-10-07
 
 * Add latest SK certificates
