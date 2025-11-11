@@ -4,7 +4,7 @@ import warnings
 from .constants import ISSUER_CERTS, ROOT_CA_FILES, TEST_ROOT_CA_FILES
 
 
-__version__ = "1.0.4.dev2"
+__version__ = "1.0.4"
 
 
 class UnknownCertificateError(Exception):
