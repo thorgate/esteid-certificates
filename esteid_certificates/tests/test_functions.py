@@ -15,12 +15,12 @@ class TestFunctions(TestCase):
     def test_get_certificate_file_name(self):
         for key, value in ISSUER_CERTS.items():
             path = get_certificate_file_name(key)
-            self.assertEqual(os.path.basename(path), value)
+            self.assertEqual(os.path.basename(path), value.name)
             self.assertTrue(os.path.exists(path))
 
     def test_get_certificate(self):
         for key, value in ISSUER_CERTS.items():
-            self.assertTrue(get_certificate(key).startswith(b'-----BEGIN CERTIFICATE-----'))
+            self.assertTrue(b'-----BEGIN CERTIFICATE-----' in get_certificate(key))
 
     def test_get_certificate_file_name__fails(self):
         with self.assertRaises(UnknownCertificateError):
