@@ -13,7 +13,7 @@ from functools import lru_cache
 
 from cryptography import x509
 from cryptography.hazmat.primitives import serialization
-from cryptography.x509 import load_der_x509_certificate
+from cryptography.x509 import load_der_x509_certificate, load_pem_x509_certificate
 
 import requests
 import bs4
@@ -32,31 +32,28 @@ class Certificate:
     title: str
     link: str
     certificate_type: CertificateType
+    is_in_der_format: bool = False
+    title_from_certificate: bool = False
 
     @property
     def filename(self) -> str:
         filename = pathlib.Path(
             urllib.parse.unquote(urllib.parse.urlparse(self.link).path)
         ).name
-        # Sometimes, certificates will have .prm.crt as a suffix, remove the crt/cer part
-        while filename.endswith(".crt") or filename.endswith(".cer"):
-            filename = filename[:-4]
-        return filename
+        # Sometimes, certificates will have .pem.crt as a suffix, so remove all the extensions
+        # and add our own. This will fail if some certificates start having `.` in names, but
+        # it has worked so far.
+        if "." in filename:
+            filename = filename[: filename.index(".")]
+        return f"{filename}.pem"
 
     def __str__(self) -> str:
         return f"{self.title} ({self.filename})"
 
 
-class ZetesCertificate(Certificate):
-    @property
-    def filename(self) -> str:
-        # Zetes certificates are always in DER format and always have had .crt extension so far
-        # We re-encode them to PEM, so we need to change the extension as well to .pem
-        # base implementation already deals with stripping out .cer or .crt if present
-        return f"{super().filename}.pem"
-
-
 class CertificateUpdater(abc.ABC):
+    extra_certificates: list[Certificate] = []
+
     def __init__(self, dry_run=False):
         self.dry_run = dry_run
         self._certificates: list[Certificate] = []
@@ -93,6 +90,7 @@ class CertificateUpdater(abc.ABC):
             return self._certificates
 
         self.load_all()
+        self._certificates.extend(self.extra_certificates)
         self.check()
         return self._certificates
 
@@ -137,6 +135,20 @@ class CertificateUpdater(abc.ABC):
             logging.error(
                 "Expected to find at least one test certificate",
             )
+
+        titles = set()
+        filenames = set()
+        for certificate in self._certificates:
+            if certificate.title in titles:
+                logging.error(
+                    "Duplicate certificate with title %s", certificate.title
+                )
+            if certificate.filename in filenames:
+                logging.error(
+                    "Duplicate certificate with filename %s", certificate.filename
+                )
+            titles.add(certificate.title)
+            filenames.add(certificate.filename)
 
     def update_directory(self, directory_path: str):
         full_path = pathlib.Path(directory_path) / self.directory
@@ -199,7 +211,19 @@ class CertificateUpdater(abc.ABC):
             self._perform_update_directory(full_path, removed_certificates)
 
     def load_certificate(self, certificate: Certificate) -> bytes:
-        return requests.get(certificate.link, headers=self.get_http_headers()).content
+        response = requests.get(certificate.link, headers=self.get_http_headers())
+        response.raise_for_status()
+        content = response.content
+
+        if certificate.is_in_der_format:
+            parsed_certificate = load_der_x509_certificate(content)
+        else:
+            parsed_certificate = load_pem_x509_certificate(content)
+        if certificate.title_from_certificate:
+            for component in parsed_certificate.subject:
+                if component.oid == x509.oid.NameOID.COMMON_NAME:
+                    certificate.title = component.value
+        return parsed_certificate.public_bytes(serialization.Encoding.PEM)
 
     def _perform_update_directory(
         self, full_path: pathlib.Path, removed_certificates: set[str]
@@ -254,6 +278,50 @@ class SKCertificateUpdater(CertificateUpdater):
     url = "https://www.skidsolutions.eu/resources/certificates/"
     directory = "sk"
     constants_file = "constants_sk.py"
+
+    extra_certificates = [
+        # Starting from 2025, SK solutions stopped publishing timestamping certificates in
+        # regular place, and started publishing them manually in the news section. Sometimes
+        # they fail to include the demo ones.
+        Certificate(
+            title="SK TIMESTAMPING UNIT 2025E",
+            link="https://c.sk.ee/SK_TIMESTAMPING_UNIT_2025E.der.crt",
+            certificate_type=CertificateType.INTERMEDIATE,
+            is_in_der_format=True,
+        ),
+        Certificate(
+            title="SK TIMESTAMPING UNIT 2025R",
+            link="https://c.sk.ee/SK_TIMESTAMPING_UNIT_2025R.der.crt",
+            certificate_type=CertificateType.INTERMEDIATE,
+            is_in_der_format=True,
+        ),
+        Certificate(
+            title="DEMO SK TIMESTAMPING UNIT 2025E",
+            link="https://c.sk.ee/DEMO_SK_TIMESTAMPING_UNIT_2025E.der.crt",
+            certificate_type=CertificateType.TEST,
+            is_in_der_format=True,
+        ),
+        Certificate(
+            title="DEMO SK TIMESTAMPING UNIT 2025R",
+            link="https://c.sk.ee/DEMO_SK_TIMESTAMPING_UNIT_2025R.der.crt",
+            certificate_type=CertificateType.TEST,
+            is_in_der_format=True,
+        ),
+        Certificate(
+            title="SK TIMESTAMPING UNIT 2026E",
+            link="https://c.sk.ee/SK_TIMESTAMPING_UNIT_2026E.der.crt",
+            certificate_type=CertificateType.INTERMEDIATE,
+            is_in_der_format=True,
+        ),
+        Certificate(
+            title="SK TIMESTAMPING UNIT 2026R",
+            link="https://c.sk.ee/SK_TIMESTAMPING_UNIT_2026R.der.crt",
+            certificate_type=CertificateType.INTERMEDIATE,
+            is_in_der_format=True,
+        ),
+        # Demo certificates for 2026 weren't published by SK, presumably 2025 certificates
+        # will be still used by demo timestamping in 2026
+    ]
 
     def load_all(self):
         self.load_root_certificates()
@@ -375,17 +443,6 @@ class ZetesCertificateUpdater(CertificateUpdater):
         self.load_live_certificates()
         self.load_test_certificates()
 
-    def load_certificate(self, certificate: Certificate):
-        content = super().load_certificate(certificate)
-        parsed_certificate = load_der_x509_certificate(content)
-        for component in parsed_certificate.subject:
-            # While SK solutions kindly provide correct names on their webpage, Zetes doesn't
-            # Correct title is important for certificate pinning we have in place, so we
-            # extract it from the CN attribute, if we can.
-            if component.oid == x509.oid.NameOID.COMMON_NAME:
-                certificate.title = component.value
-        return parsed_certificate.public_bytes(serialization.Encoding.PEM)
-
     def load_live_certificates(self):
         for anchor in self.get_document(self.live_url).find_all("a"):
             href = anchor.attrs.get("href")
@@ -395,12 +452,14 @@ class ZetesCertificateUpdater(CertificateUpdater):
                 )
                 root = "ca" in title.lower()
                 self._certificates.append(
-                    ZetesCertificate(
+                    Certificate(
                         title=title,
                         link=href,
                         certificate_type=CertificateType.ROOT
                         if root
                         else CertificateType.INTERMEDIATE,
+                        is_in_der_format=True,
+                        title_from_certificate=True,
                     )
                 )
 
@@ -414,12 +473,14 @@ class ZetesCertificateUpdater(CertificateUpdater):
                 )
                 root = "root" in anchor.parent.text.lower()
                 self._certificates.append(
-                    ZetesCertificate(
+                    Certificate(
                         title=title,
                         link=href,
                         certificate_type=CertificateType.TEST_ROOT
                         if root
                         else CertificateType.TEST,
+                        is_in_der_format=True,
+                        title_from_certificate=True,
                     )
                 )
                 visited.add(href)
