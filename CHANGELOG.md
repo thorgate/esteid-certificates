@@ -1,5 +1,13 @@
 # Changelog for esteid-certificates
 
+## Version 1.0.5, 2026-02-17
+
+* Add SK timestamping certificates for 2026
+* Update autoupdater script
+  * account for SK not publishing some certificates in the regular place
+  * Always load and re-encode the certificate to PEM format (to ensure the certificate is loadable and in
+  valid format)
+
 ## Version 1.0.4, 2025-11-11
 
 * Implement Zetes certificate automatic upgrade
